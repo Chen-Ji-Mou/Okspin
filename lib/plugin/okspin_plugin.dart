@@ -14,6 +14,10 @@ class OkSpinPlugin {
     return await _retry(() => _channel.invokeMethod<bool>('getPlacement'));
   }
 
+  static Future<bool> openGSpace() async {
+    return await _retry(() => _channel.invokeMethod<bool>('openGSpace'));
+  }
+
   static Future<bool> _retry(Future<bool?> Function() doThings) async {
     int retryCount = 0;
     bool isRetry = true;

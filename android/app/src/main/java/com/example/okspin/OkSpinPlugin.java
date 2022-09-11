@@ -1,6 +1,7 @@
 package com.example.okspin;
 
 import android.content.Context;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 import io.flutter.embedding.engine.plugins.FlutterPlugin;
@@ -32,7 +33,6 @@ public class OkSpinPlugin implements FlutterPlugin, MethodChannel.MethodCallHand
         applicationContext = null;
         channel.setMethodCallHandler(null);
         channel = null;
-        factory = null;
     }
 
     @Override
@@ -43,6 +43,9 @@ public class OkSpinPlugin implements FlutterPlugin, MethodChannel.MethodCallHand
                 break;
             case "getPlacement":
                 OkSpinManager.getPlacement(applicationContext, result, factory);
+                break;
+            case "openGSpace":
+                OkSpinManager.openGSpace(applicationContext, channel, result);
                 break;
             default:
                 result.notImplemented();

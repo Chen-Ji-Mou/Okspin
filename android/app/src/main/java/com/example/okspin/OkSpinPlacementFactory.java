@@ -1,8 +1,6 @@
 package com.example.okspin;
 
 import android.content.Context;
-import android.os.Handler;
-import android.os.Looper;
 import android.view.View;
 
 import java.util.Map;
@@ -22,13 +20,13 @@ public class OkSpinPlacementFactory extends PlatformViewFactory {
 
     @NonNull
     @Override
-    public PlatformView create(@Nullable Context context, int viewId, Object args) {
+    public PlatformView create(@Nullable Context context, int viewId, @Nullable Object args) {
         Map<String, Integer> params = (Map<String, Integer>) args;
         view = new OkSpinPlacement(context, params);
         return view;
     }
 
-    public void setPlacement(View placement) {
+    public void setPlacement(View placement) throws NullPointerException {
         view.setPlacement(placement);
     }
 }

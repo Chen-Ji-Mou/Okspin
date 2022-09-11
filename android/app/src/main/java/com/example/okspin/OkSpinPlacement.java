@@ -14,11 +14,11 @@ import androidx.annotation.Nullable;
 import io.flutter.plugin.platform.PlatformView;
 
 public class OkSpinPlacement implements PlatformView {
-    private RelativeLayout container;
+    private final RelativeLayout container;
     private final int width;
     private final int height;
 
-    public OkSpinPlacement(@Nullable Context context, Map<String, Integer> params) {
+    public OkSpinPlacement(@Nullable Context context, @Nullable Map<String, Integer> params) {
         container = new RelativeLayout(context);
         ViewGroup.LayoutParams layoutParams = new ViewGroup.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
@@ -38,7 +38,7 @@ public class OkSpinPlacement implements PlatformView {
     @Override
     public void dispose() {}
 
-    public void setPlacement(View placement) {
+    public void setPlacement(View placement) throws NullPointerException {
         if (container.getChildCount() > 0) {
             container.removeAllViews();
         }
