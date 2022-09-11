@@ -5,6 +5,8 @@ import android.os.Handler;
 import android.os.Looper;
 import android.view.View;
 
+import java.util.Map;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import io.flutter.plugin.common.StandardMessageCodec;
@@ -20,8 +22,9 @@ public class OkSpinPlacementFactory extends PlatformViewFactory {
 
     @NonNull
     @Override
-    public PlatformView create(@Nullable Context context, int viewId, @Nullable Object args) {
-        view = new OkSpinPlacement(context);
+    public PlatformView create(@Nullable Context context, int viewId, Object args) {
+        Map<String, Integer> params = (Map<String, Integer>) args;
+        view = new OkSpinPlacement(context, params);
         return view;
     }
 

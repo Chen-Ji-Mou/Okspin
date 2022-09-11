@@ -23,7 +23,16 @@ class _OkSpinPlacementState extends State<OkSpinPlacementWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return const AndroidView(viewType: 'plugins.flutter.io/okspin_placement');
+    return LayoutBuilder(builder: (context, constraints) {
+      return AndroidView(
+        viewType: 'plugins.flutter.io/okspin_placement',
+        creationParams: <String, int>{
+          "width": constraints.maxWidth.toInt() ~/ 2,
+          "height": constraints.maxHeight.toInt() ~/ 2,
+        },
+        creationParamsCodec: const StandardMessageCodec(),
+      );
+    });
   }
 
   Future<dynamic> _methodCallback(MethodCall call) async {}
