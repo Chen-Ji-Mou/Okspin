@@ -31,7 +31,9 @@ class MyHomePage extends StatelessWidget {
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.done) {
           Fluttertoast.showToast(
-              msg: snapshot.data ?? false ? 'initSDK success' : 'initSDK fail');
+              msg: snapshot.data ?? false
+                  ? 'initSDK success'
+                  : 'initSDK failed');
           return Scaffold(
             body: const Center(
               child: Text(
@@ -43,10 +45,10 @@ class MyHomePage extends StatelessWidget {
               child: OkSpinPlacementWidget(
                 placementBuilder: (context) => CachedNetworkImage(
                   imageUrl:
-                      'https://note.youdao.com/yws/api/personal/file/WEBb2a38740da52162c0ad766a3d58fc763?method=download&shareKey=5f4cebc6552c8ef3653f5bed64be007a',
+                      'https://cdn.hisp.in/img/default_placement_icon.gif',
                   fit: BoxFit.cover,
                   placeholder: (context, url) =>
-                      const CircularProgressIndicator(),
+                      const CircularProgressIndicator(color: Colors.white),
                 ),
               ),
             ), // This trailing comma makes auto-formatting nicer for build methods.

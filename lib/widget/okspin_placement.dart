@@ -1,21 +1,19 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:okspin/plugin/okspin_plugin.dart';
 
 class OkSpinPlacementWidget extends StatefulWidget {
-  const OkSpinPlacementWidget({Key? key, this.placementBuilder})
+  const OkSpinPlacementWidget({Key? key, required this.placementBuilder})
       : super(key: key);
 
-  final WidgetBuilder? placementBuilder;
+  final WidgetBuilder placementBuilder;
 
   @override
   State<StatefulWidget> createState() => _OkSpinPlacementState();
 }
 
 class _OkSpinPlacementState extends State<OkSpinPlacementWidget> {
-  bool get hasPlacement => widget.placementBuilder != null;
   bool spaceOpening = false;
   Future<bool>? getPlacementFuture;
 
@@ -36,66 +34,52 @@ class _OkSpinPlacementState extends State<OkSpinPlacementWidget> {
     return Center(
       child: spaceOpening
           ? const CircularProgressIndicator(color: Colors.white)
-          : getPlacement(),
+          : buildPlacement(),
     );
   }
 
-  Widget getPlacement() {
-    return hasPlacement
-        ? InkWell(
-            radius: 0,
-            highlightColor: Colors.transparent,
-            onTap: () {
-              changeStatus();
-              OkSpinPlugin.openGSpace();
-            },
-            child: widget.placementBuilder?.call(context),
-          )
-        : LayoutBuilder(builder: (context, constraints) {
-            return FutureBuilder<bool>(
-              future: getPlacementFuture ??= OkSpinPlugin.getPlacement(),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.done) {
-                  bool success = snapshot.data ?? false;
-                  Fluttertoast.showToast(
-                      msg: success
-                          ? 'getPlacement success'
-                          : 'getPlacement fail');
-                  if (success) {
-                    return GestureDetector(
-                      onTap: changeStatus,
-                      child: AndroidView(
-                        viewType: 'plugins.flutter.io/okspin_placement',
-                        creationParams: <String, int>{
-                          "width": constraints.maxWidth.toInt(),
-                          "height": constraints.maxHeight.toInt(),
-                        },
-                        creationParamsCodec: const StandardMessageCodec(),
-                      ),
-                    );
-                  } else {
-                    return InkWell(
-                      radius: 0,
-                      highlightColor: Colors.transparent,
-                      onTap: () {
-                        changeStatus();
-                        OkSpinPlugin.openGSpace();
-                      },
-                      child: CachedNetworkImage(
-                        imageUrl:
-                            'https://cdn.hisp.in/img/default_placement_icon.gif',
-                        width: constraints.maxWidth,
-                        height: constraints.maxHeight,
-                        fit: BoxFit.cover,
-                      ),
-                    );
-                  }
-                } else {
-                  return const CircularProgressIndicator();
-                }
-              },
-            );
-          });
+  Widget buildPlacement() {
+    return LayoutBuilder(builder: (context, constraints) {
+      return FutureBuilder<bool>(
+        future: getPlacementFuture ??= OkSpinPlugin.getPlacement(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.done) {
+            bool success = snapshot.data ?? false;
+            Fluttertoast.showToast(
+                msg: success ? 'getPlacement success' : 'getPlacement failed');
+            if (success) {
+              return GestureDetector(
+                onTap: changeStatus,
+                child: AndroidView(
+                  viewType: 'plugins.flutter.io/okspin_placement',
+                  creationParams: <String, int>{
+                    "width": constraints.maxWidth.toInt(),
+                    "height": constraints.maxHeight.toInt(),
+                  },
+                  creationParamsCodec: const StandardMessageCodec(),
+                ),
+              );
+            } else {
+              return buildDefaultPlacement();
+            }
+          } else {
+            return const CircularProgressIndicator(color: Colors.white);
+          }
+        },
+      );
+    });
+  }
+
+  Widget buildDefaultPlacement() {
+    return InkWell(
+      radius: 0,
+      highlightColor: Colors.transparent,
+      onTap: () {
+        changeStatus();
+        OkSpinPlugin.openGSpace();
+      },
+      child: widget.placementBuilder.call(context),
+    );
   }
 
   void changeStatus() => setState(() => spaceOpening = !spaceOpening);
