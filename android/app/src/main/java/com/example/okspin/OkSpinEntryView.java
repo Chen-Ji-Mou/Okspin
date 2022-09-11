@@ -1,31 +1,47 @@
 package com.example.okspin;
 
 import android.content.Context;
+import android.view.Gravity;
 import android.view.View;
-import android.widget.FrameLayout;
+import android.view.ViewGroup;
+import android.widget.RelativeLayout;
 
 import androidx.annotation.Nullable;
-
-import java.util.Map;
-
-import io.flutter.plugin.common.BinaryMessenger;
 import io.flutter.plugin.platform.PlatformView;
 
 public class OkSpinEntryView implements PlatformView {
-    final FrameLayout layout;
+    private RelativeLayout container;
 
-    public OkSpinEntryView(Context context, BinaryMessenger messenger,
-                           int id, Map<String, Object> params
+    public OkSpinEntryView(@Nullable Context context
     ){
-        layout = new FrameLayout(context);
+        container = new RelativeLayout(context);
+        ViewGroup.LayoutParams layoutParams = new ViewGroup.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+        container.setLayoutParams(layoutParams);
+        container.setGravity(Gravity.CENTER);
     }
 
     @Nullable
     @Override
     public View getView() {
-        return layout;
+        return container;
     }
 
     @Override
-    public void dispose() {}
+    public void dispose() {
+        container = null;
+    }
+
+    public void setEntryView(View entryView) {
+        if (container.getChildCount() > 0) {
+            container.removeAllViews();
+        }
+        if (entryView.getParent() != null) {
+            ViewGroup viewGroup = (ViewGroup) entryView.getParent();
+            viewGroup.removeView(entryView);
+        }
+        RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(80, 80);
+        layoutParams.addRule(RelativeLayout.CENTER_IN_PARENT);
+        container.addView(entryView, layoutParams);
+    }
 }

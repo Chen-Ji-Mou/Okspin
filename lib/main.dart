@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:okspin/widget/okspin_entry.dart';
+import 'package:okspin/plugin/okspin_plugin.dart';
 
 void main() {
   runApp(const MyApp());
@@ -22,16 +25,28 @@ class MyHomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
-      body: Center(
-        child: Text(
-          '点击悬浮按钮进入GSpace',
-        ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: null,
-        child: AndroidView(viewType: 'OkSpinEntryView'),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
+    return FutureBuilder<dynamic>(
+      future: OkSpinPlugin.initSDK(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.done) {
+          if (snapshot.data is String) {
+            Fluttertoast.showToast(msg: snapshot.data);
+          }
+          return const Scaffold(
+            body: Center(
+              child: Text(
+                '点击悬浮按钮进入GSpace',
+              ),
+            ),
+            floatingActionButton: FloatingActionButton(
+              onPressed: null,
+              child: Center(child: OkSpinEntryView()),
+            ), // This trailing comma makes auto-formatting nicer for build methods.
+          );
+        } else {
+          return const Center(child: CircularProgressIndicator());
+        }
+      },
     );
   }
 }
