@@ -11,21 +11,21 @@ import io.flutter.plugin.common.StandardMessageCodec;
 import io.flutter.plugin.platform.PlatformView;
 import io.flutter.plugin.platform.PlatformViewFactory;
 
-public class OkSpinEntryFactory extends PlatformViewFactory {
-    private OkSpinEntryView view;
+public class OkSpinPlacementFactory extends PlatformViewFactory {
+    private OkSpinPlacement view;
 
-    public OkSpinEntryFactory() {
+    public OkSpinPlacementFactory() {
         super(StandardMessageCodec.INSTANCE);
     }
 
     @NonNull
     @Override
     public PlatformView create(@Nullable Context context, int viewId, @Nullable Object args) {
-        view = new OkSpinEntryView(context);
+        view = new OkSpinPlacement(context);
         return view;
     }
 
-    public void setEntryView(View entryView) {
-        new Handler(Looper.getMainLooper()).post(() -> view.setEntryView(entryView));
+    public void setPlacement(View placement) {
+        view.setPlacement(placement);
     }
 }

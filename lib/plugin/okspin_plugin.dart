@@ -6,11 +6,31 @@ class OkSpinPlugin {
       MethodChannel('plugins.flutter.io/okspin_plugin');
   static MethodChannel get channel => _channel;
 
-  static Future<dynamic> initSDK() async {
-    return await _channel.invokeMethod('initSDK');
+  static Future<bool> initSDK() async {
+    return await _retry(() => _channel.invokeMethod<bool>('initSDK'));
   }
 
-  static Future<dynamic> getEntryView() async {
-    return await _channel.invokeMethod('getEntryView');
+  static Future<bool> getPlacement() async {
+    return await _retry(() => _channel.invokeMethod<bool>('getPlacement'));
+  }
+
+  static Future<bool> _retry(Future<bool?> Function() doThings) async {
+    int retryCount = 0;
+    bool isRetry = true;
+    bool result = false;
+    while (isRetry && retryCount < 3) {
+      try {
+        result = await doThings() ?? false;
+        isRetry = false;
+      } catch (error) {
+        if (retryCount < 3) {
+          retryCount++;
+          await Future.delayed(const Duration(milliseconds: 1000));
+          continue;
+        }
+        isRetry = false;
+      }
+    }
+    return result;
   }
 }

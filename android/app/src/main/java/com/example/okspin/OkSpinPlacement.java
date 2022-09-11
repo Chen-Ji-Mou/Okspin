@@ -9,10 +9,10 @@ import android.widget.RelativeLayout;
 import androidx.annotation.Nullable;
 import io.flutter.plugin.platform.PlatformView;
 
-public class OkSpinEntryView implements PlatformView {
+public class OkSpinPlacement implements PlatformView {
     private RelativeLayout container;
 
-    public OkSpinEntryView(@Nullable Context context
+    public OkSpinPlacement(@Nullable Context context
     ){
         container = new RelativeLayout(context);
         ViewGroup.LayoutParams layoutParams = new ViewGroup.LayoutParams(
@@ -32,16 +32,16 @@ public class OkSpinEntryView implements PlatformView {
         container = null;
     }
 
-    public void setEntryView(View entryView) {
+    public void setPlacement(View placement) {
         if (container.getChildCount() > 0) {
             container.removeAllViews();
         }
-        if (entryView.getParent() != null) {
-            ViewGroup viewGroup = (ViewGroup) entryView.getParent();
-            viewGroup.removeView(entryView);
+        if (placement.getParent() != null) {
+            ViewGroup viewGroup = (ViewGroup) placement.getParent();
+            viewGroup.removeView(placement);
         }
         RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(80, 80);
         layoutParams.addRule(RelativeLayout.CENTER_IN_PARENT);
-        container.addView(entryView, layoutParams);
+        container.addView(placement, layoutParams);
     }
 }

@@ -17,14 +17,14 @@ public class OkSpinManager {
             public void onInitSuccess()
             {
                 super.onInitSuccess();
-                result.success("SDK初始化成功");
+                _return(result, null, null);
             }
 
             @Override
             public void onInitFailed(Error error)
             {
                 super.onInitFailed(error);
-                result.error(String.valueOf(error.getCode()), "SDK初始化失败", error.toString());
+                _return(result, error, "initSDK => onInitFailed");
             }
         });
         // 初始化SDK
@@ -33,7 +33,7 @@ public class OkSpinManager {
         OkSpin.debug(BuildConfig.DEBUG);
     }
 
-    public static void getEntryView(Context context, MethodChannel.Result result, OkSpinEntryFactory factory) {
+    public static void getPlacement(Context context, MethodChannel.Result result, OkSpinPlacementFactory factory) {
         String placementId = context.getString(R.string.okspin_placement_id);
         // 注册监听
         OkSpin.setListener(new OkSpinListener()
@@ -42,25 +42,36 @@ public class OkSpinManager {
             public void onIconReady(String s)
             {
                 super.onIconReady(s);
-                factory.setEntryView(OkSpin.showIcon(placementId));
-                result.success("EntryView加载成功");
+                factory.setPlacement(OkSpin.showIcon(placementId));
+                _return(result, null, null);
             }
 
             @Override
             public void onIconLoadFailed(String s, Error error)
             {
                 super.onIconLoadFailed(s, error);
-                result.error(String.valueOf(error.getCode()), "EntryView加载失败", error.toString());
+                _return(result, error, "getPlacement => onIconLoadFailed");
             }
 
             @Override
             public void onIconShowFailed(String s, Error error)
             {
                 super.onIconShowFailed(s, error);
-                result.error(String.valueOf(error.getCode()), "EntryView无法显示", error.toString());
+                _return(result, error, "getPlacement => onIconShowFailed");
             }
         });
-        // 加载EntryView
+        // 加载placement
         OkSpin.loadIcon(placementId);
+    }
+
+    static void _return(MethodChannel.Result result, Error error, String errorMsg) {
+        // 返回结果到flutter端
+        if (error != null) {
+            result.error(String.valueOf(error.getCode()), errorMsg, error.toString());
+        } else {
+            result.success(true);
+        }
+        // 取消监听
+        OkSpin.setListener(null);
     }
 }

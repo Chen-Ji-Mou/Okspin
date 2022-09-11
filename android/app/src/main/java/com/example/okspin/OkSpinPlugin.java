@@ -10,7 +10,7 @@ import io.flutter.plugin.common.MethodChannel;
 public class OkSpinPlugin implements FlutterPlugin, MethodChannel.MethodCallHandler {
     private Context applicationContext;
     private MethodChannel channel;
-    private OkSpinEntryFactory factory;
+    private OkSpinPlacementFactory factory;
 
     @Override
     public void onAttachedToEngine(@NonNull FlutterPluginBinding binding) {
@@ -20,10 +20,10 @@ public class OkSpinPlugin implements FlutterPlugin, MethodChannel.MethodCallHand
         // 注册此通道的监听
         channel.setMethodCallHandler(this);
         // 创建PlatformView的工厂对象
-        factory = new OkSpinEntryFactory();
+        factory = new OkSpinPlacementFactory();
         // 在Flutter引擎中注册PlatformView的工厂对象
         binding.getPlatformViewRegistry().registerViewFactory(
-                "plugins.flutter.io/okspin_entry_view", factory);
+                "plugins.flutter.io/okspin_placement", factory);
     }
 
     @Override
@@ -41,8 +41,8 @@ public class OkSpinPlugin implements FlutterPlugin, MethodChannel.MethodCallHand
             case "initSDK":
                 OkSpinManager.initSDK(applicationContext, result);
                 break;
-            case "getEntryView":
-                OkSpinManager.getEntryView(applicationContext, result, factory);
+            case "getPlacement":
+                OkSpinManager.getPlacement(applicationContext, result, factory);
                 break;
             default:
                 result.notImplemented();

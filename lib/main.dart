@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:okspin/widget/okspin_entry.dart';
+import 'package:okspin/widget/okspin_placement.dart';
 import 'package:okspin/plugin/okspin_plugin.dart';
 
 void main() {
@@ -25,13 +25,12 @@ class MyHomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<dynamic>(
+    return FutureBuilder<bool>(
       future: OkSpinPlugin.initSDK(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.done) {
-          if (snapshot.data is String) {
-            Fluttertoast.showToast(msg: snapshot.data);
-          }
+          Fluttertoast.showToast(
+              msg: snapshot.data ?? false ? 'initSDK success' : 'initSDK fail');
           return const Scaffold(
             body: Center(
               child: Text(
@@ -40,7 +39,7 @@ class MyHomePage extends StatelessWidget {
             ),
             floatingActionButton: FloatingActionButton(
               onPressed: null,
-              child: Center(child: OkSpinEntryView()),
+              child: Center(child: OkSpinPlacementWidget()),
             ), // This trailing comma makes auto-formatting nicer for build methods.
           );
         } else {
