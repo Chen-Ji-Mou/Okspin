@@ -4,7 +4,10 @@ import android.content.Context;
 import android.util.Log;
 
 import com.spin.ok.gp.OkSpin;
+import com.spin.ok.gp.model.GSpaceReward;
 import com.spin.ok.gp.utils.Error;
+
+import java.util.List;
 
 import androidx.annotation.Nullable;
 import io.flutter.BuildConfig;
@@ -19,14 +22,14 @@ public class OkSpinManager {
             public void onInitSuccess()
             {
                 super.onInitSuccess();
-                _return(result, null, null, true);
+                _return(result, true, null, null, true);
             }
 
             @Override
             public void onInitFailed(Error error)
             {
                 super.onInitFailed(error);
-                _return(result, error, "initSDK => onInitFailed", true);
+                _return(result, false, error, "initSDK => onInitFailed", true);
             }
         });
         // 初始化SDK
@@ -46,11 +49,11 @@ public class OkSpinManager {
                 super.onIconReady(s);
                 try {
                     factory.setPlacement(OkSpin.showIcon(placementId));
-                    _return(result, null, null, true);
+                    _return(result, true, null, null, true);
                 } catch (NullPointerException exception) {
-                    String errorMsg = "onIconReady => setPlacement failed";
+                    String errorMsg = "OkSpin.showIcon(placementId) return null";
                     Log.e(TAG, errorMsg, exception);
-                    _return(result, new Error(-1, exception.toString()), errorMsg, true);
+                    _return(result, false, new Error(-1, errorMsg), null, true);
                 }
             }
 
@@ -58,14 +61,14 @@ public class OkSpinManager {
             public void onIconLoadFailed(String s, Error error)
             {
                 super.onIconLoadFailed(s, error);
-                _return(result, error, "getPlacement => onIconLoadFailed", true);
+                _return(result, false, error, "getPlacement => onIconLoadFailed", true);
             }
 
             @Override
             public void onIconShowFailed(String s, Error error)
             {
                 super.onIconShowFailed(s, error);
-                _return(result, error, "getPlacement => onIconShowFailed", true);
+                _return(result, false, error, "getPlacement => onIconShowFailed", true);
             }
         });
         // 加载placement
@@ -81,14 +84,14 @@ public class OkSpinManager {
             public void onGSpaceOpen(String s)
             {
                 super.onGSpaceOpen(s);
-                _return(result, null, null, false);
+                _return(result, true, null, null, false);
             }
 
             @Override
             public void onGSpaceOpenFailed(String s, Error error)
             {
                 super.onGSpaceOpenFailed(s, error);
-                _return(result, error, "openGSpace => onGSpaceOpenFailed", false);
+                _return(result, false, error, "openGSpace => onGSpaceOpenFailed", false);
             }
 
             @Override
@@ -96,26 +99,118 @@ public class OkSpinManager {
             {
                 super.onGSpaceClose(s);
                 channel.invokeMethod("onGSpaceClose", null);
-                _return(null, null, null, true);
+                _return(null, true, null, null, true);
+                // 查询用户在GSpace中已兑换的奖品的记录
+                OkSpin.queryGSpaceRewards(new OkSpin.QueryGSpaceRewardsCallback()
+                {
+                    @Override
+                    public void onGetGSRewards(GSpaceReward rewardRecord)
+                    {
+                        // 返回记录到flutter端
+                        List<GSpaceReward.GSpaceOrder> records = rewardRecord.getOrders();
+                        channel.invokeMethod("returnRewardRecords", records);
+                    }
+
+                    @Override
+                    public void onGetGSRewardsError(Error error) { /*do nothing*/ }
+                });
             }
         });
-        // 打开GSpace页面
-        OkSpin.openGSpace(placementId);
+        // GSpace是否可用
+        if (OkSpin.isGSpaceReady(placementId)) {
+            // 打开GSpace页面
+            OkSpin.openGSpace(placementId);
+        } else {
+            _return(result, false, null, null, true);
+        }
     }
 
-    private static void _return(MethodChannel.Result result, @Nullable Error error,
+    public static void notifyGSPubTaskPayout(MethodChannel.Result result,
+            @Nullable List<GSpaceReward.GSpaceOrder> records
+    ){
+        // 发放奖励完成后通知OKSpin
+        OkSpin.notifyGSPubTaskPayout(records, new OkSpin.GSPubTaskPayoutCallback()
+        {
+            @Override
+            public void onGSPubTaskPayoutSuccess()
+            {
+                _return(result, true, null, null, false);
+            }
+
+            @Override
+            public void onGSPubTaskPayoutError(Error error)
+            {
+                _return(result, false, error,
+                        "notifyGSPubTaskPayout => onGSPubTaskPayoutError", false);
+            }
+        });
+    }
+
+    public static void openInteractiveAds(Context context, MethodChannel channel, MethodChannel.Result result) {
+        String placementId = context.getString(R.string.okspin_placement_id);
+        // 注册监听
+        OkSpin.setListener(new OkSpinListener()
+        {
+            @Override
+            public void onInteractiveOpen(String s)
+            {
+                super.onInteractiveOpen(s);
+                _return(result, true, null, null, false);
+            }
+
+            @Override
+            public void onInteractiveOpenFailed(String s, Error error)
+            {
+                super.onInteractiveOpenFailed(s, error);
+                _return(result, false, error,
+                        "openInteractiveAds => onInteractiveOpenFailed", false);
+            }
+
+            @Override
+            public void onInteractiveClose(String s)
+            {
+                super.onInteractiveClose(s);
+                channel.invokeMethod("onInteractiveAdsClose", null);
+                _return(null, true, null, null, true);
+            }
+        });
+        // Interactive Ads是否可用
+        if (OkSpin.isInteractiveReady(placementId)) {
+            // 打开Interactive Ads页面
+            OkSpin.openInteractive(placementId);
+        } else {
+            _return(result, false, null, null, true);
+        }
+    }
+
+    public static void setUserId(MethodChannel.Result result, String userId) {
+        try {
+            OkSpin.setUserId(userId);
+            _return(result, true, null, null, false);
+        } catch (Exception exception) {
+            String errorMsg = "setUserId failed";
+            Log.e("OkSpinManager", errorMsg, exception);
+            _return(result, false, new Error(-1, errorMsg), null, true);
+        }
+    }
+
+    public static void getUserId(MethodChannel.Result result) {
+        result.success(OkSpin.getUserId());
+    }
+
+    private static void _return(MethodChannel.Result result, boolean success, @Nullable Error error,
             @Nullable String errorMsg, boolean cancelListener
     ){
+        // 返回结果到flutter端
         if (result != null) {
-            // 返回结果到flutter端
             if (error != null) {
                 result.error(String.valueOf(error.getCode()), errorMsg, error.toString());
             } else {
-                result.success(true);
+                result.success(success);
             }
         }
+        // 取消监听
         if (cancelListener) {
-            // 取消监听
             OkSpin.setListener(null);
         }
     }

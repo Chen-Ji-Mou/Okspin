@@ -4,23 +4,33 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:okspin/plugin/okspin_plugin.dart';
 
 class OkSpinPlacementWidget extends StatefulWidget {
-  const OkSpinPlacementWidget({Key? key, required this.placementBuilder})
+  const OkSpinPlacementWidget(
+      {Key? key,
+      required this.userId,
+      required this.placementBuilder,
+      this.handleGSpaceRewards})
       : super(key: key);
 
+  final String userId;
   final WidgetBuilder placementBuilder;
+  final Future<void> Function(List<dynamic> records)? handleGSpaceRewards;
 
   @override
   State<StatefulWidget> createState() => _OkSpinPlacementState();
 }
 
 class _OkSpinPlacementState extends State<OkSpinPlacementWidget> {
-  bool spaceOpening = false;
+  bool jumping = false;
   Future<bool>? getPlacementFuture;
 
   @override
   void initState() {
     super.initState();
     OkSpinPlugin.channel.setMethodCallHandler(channelCallback);
+    OkSpinPlugin.setUserId(widget.userId).then((value) {
+      Fluttertoast.showToast(
+          msg: value ? 'setUserId success' : 'setUserId failed');
+    });
   }
 
   @override
@@ -32,7 +42,7 @@ class _OkSpinPlacementState extends State<OkSpinPlacementWidget> {
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: spaceOpening
+      child: jumping
           ? const CircularProgressIndicator(color: Colors.white)
           : buildPlacement(),
     );
@@ -49,7 +59,7 @@ class _OkSpinPlacementState extends State<OkSpinPlacementWidget> {
                 msg: success ? 'getPlacement success' : 'getPlacement failed');
             if (success) {
               return GestureDetector(
-                onTap: changeStatus,
+                onTap: changeJumpStatus,
                 child: AndroidView(
                   viewType: 'plugins.flutter.io/okspin_placement',
                   creationParams: <String, int>{
@@ -75,19 +85,30 @@ class _OkSpinPlacementState extends State<OkSpinPlacementWidget> {
       radius: 0,
       highlightColor: Colors.transparent,
       onTap: () {
-        changeStatus();
-        OkSpinPlugin.openGSpace();
+        changeJumpStatus();
+        OkSpinPlugin.openGSpace().then((value) {
+          Fluttertoast.showToast(msg: value ? 'jump success' : 'jump failed');
+          // 如果打开失败关闭加载状态
+          if (!value) changeJumpStatus();
+        });
       },
       child: widget.placementBuilder.call(context),
     );
   }
 
-  void changeStatus() => setState(() => spaceOpening = !spaceOpening);
+  void changeJumpStatus() => setState(() => jumping = !jumping);
 
   Future<dynamic> channelCallback(MethodCall call) async {
+    Fluttertoast.showToast(msg: '${call.method} params: ${call.arguments}');
     switch (call.method) {
+      case 'onInteractiveAdsClose':
       case 'onGSpaceClose':
-        changeStatus();
+        changeJumpStatus();
+        break;
+      case 'returnRewardRecords':
+        await widget.handleGSpaceRewards?.call(call.arguments);
+        // 发放奖励完成后通知OKSpin
+        OkSpinPlugin.notifyGSPubTaskPayout(call.arguments);
         break;
     }
   }

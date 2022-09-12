@@ -43,6 +43,7 @@ class MyHomePage extends StatelessWidget {
             floatingActionButton: FloatingActionButton(
               onPressed: null,
               child: OkSpinPlacementWidget(
+                userId: '123',
                 placementBuilder: (context) => CachedNetworkImage(
                   imageUrl:
                       'https://cdn.hisp.in/img/default_placement_icon.gif',

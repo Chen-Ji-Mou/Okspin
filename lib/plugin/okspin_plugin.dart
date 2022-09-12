@@ -18,6 +18,24 @@ class OkSpinPlugin {
     return await _retry(() => _channel.invokeMethod<bool>('openGSpace'));
   }
 
+  static Future<bool> openInteractiveAds() async {
+    return await _retry(
+        () => _channel.invokeMethod<bool>('openInteractiveAds'));
+  }
+
+  static Future<bool> notifyGSPubTaskPayout(List<dynamic> records) async {
+    return await _retry(
+        () => _channel.invokeMethod('notifyGSPubTaskPayout', records));
+  }
+
+  static Future<String> getUserId() async {
+    return await _channel.invokeMethod('getUserId') ?? '';
+  }
+
+  static Future<bool> setUserId(String userId) async {
+    return await _retry(() => _channel.invokeMethod('setUserId', userId));
+  }
+
   static Future<bool> _retry(Future<bool?> Function() doThings) async {
     int retryCount = 0;
     bool isRetry = true;

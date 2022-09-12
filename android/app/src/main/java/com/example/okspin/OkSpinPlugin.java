@@ -46,6 +46,18 @@ public class OkSpinPlugin implements FlutterPlugin, MethodChannel.MethodCallHand
             case "openGSpace":
                 OkSpinManager.openGSpace(applicationContext, channel, result);
                 break;
+            case "openInteractiveAds":
+                OkSpinManager.openInteractiveAds(applicationContext, channel, result);
+                break;
+            case "notifyGSPubTaskPayout":
+                OkSpinManager.notifyGSPubTaskPayout(result, call.arguments());
+                break;
+            case "setUserId":
+                OkSpinManager.setUserId(result, call.arguments());
+                break;
+            case "getUserId":
+                OkSpinManager.getUserId(result);
+                break;
             default:
                 result.notImplemented();
                 break;
