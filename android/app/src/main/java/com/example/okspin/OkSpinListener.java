@@ -5,9 +5,6 @@ import android.util.Log;
 import com.spin.ok.gp.OkSpin;
 import com.spin.ok.gp.utils.Error;
 
-import androidx.annotation.NonNull;
-import io.flutter.embedding.engine.FlutterEngine;
-
 public abstract class OkSpinListener implements OkSpin.SpinListener
 {
     public static final String TAG = "OkSpinListener";
@@ -22,7 +19,6 @@ public abstract class OkSpinListener implements OkSpin.SpinListener
 
     /**
      * SDK初始化失败
-     * @param error
      */
     @Override
     public void onInitFailed(Error error) {
@@ -31,7 +27,7 @@ public abstract class OkSpinListener implements OkSpin.SpinListener
 
     /**
      * Placement 加载成功
-     * @param s
+     * @param s placement id
      */
     @Override
     public void onIconReady(String s) {
@@ -40,8 +36,7 @@ public abstract class OkSpinListener implements OkSpin.SpinListener
 
     /**
      * Placement 加载失败
-     * @param s
-     * @param error
+     * @param s placement id
      */
     @Override
     public void onIconLoadFailed(String s, Error error) {
@@ -50,8 +45,7 @@ public abstract class OkSpinListener implements OkSpin.SpinListener
 
     /**
      * Placement 素材展示失败
-     * @param s
-     * @param error
+     * @param s placement id
      */
     @Override
     public void onIconShowFailed(String s, Error error) {
@@ -60,7 +54,7 @@ public abstract class OkSpinListener implements OkSpin.SpinListener
 
     /**
      * Placement 被点击
-     * @param s
+     * @param s placement id
      */
     @Override
     public void onIconClick(String s) {
@@ -69,7 +63,7 @@ public abstract class OkSpinListener implements OkSpin.SpinListener
 
     /**
      * GSpace - Interactive Ads 页面被打开
-     * @param s
+     * @param s placement id
      */
     @Override
     public void onInteractiveOpen(String s) {
@@ -78,8 +72,7 @@ public abstract class OkSpinListener implements OkSpin.SpinListener
 
     /**
      * GSpace - Interactive Ads 页面打开失败
-     * @param s
-     * @param error
+     * @param s placement id
      */
     @Override
     public void onInteractiveOpenFailed(String s, Error error) {
@@ -88,7 +81,7 @@ public abstract class OkSpinListener implements OkSpin.SpinListener
 
     /**
      * GSpace - Interactive Ads 页面被关闭
-     * @param s
+     * @param s placement id
      */
     @Override
     public void onInteractiveClose(String s) {
@@ -97,7 +90,7 @@ public abstract class OkSpinListener implements OkSpin.SpinListener
 
     /**
      * GSpace - Interactive Wall 页面被打开
-     * @param s
+     * @param s placement id
      */
     @Override
     public void onOfferWallOpen(String s) {
@@ -106,8 +99,7 @@ public abstract class OkSpinListener implements OkSpin.SpinListener
 
     /**
      * GSpace - Interactive Wall 页面打开失败
-     * @param s
-     * @param error
+     * @param s placement id
      */
     @Override
     public void onOfferWallOpenFailed(String s, Error error) {
@@ -116,7 +108,7 @@ public abstract class OkSpinListener implements OkSpin.SpinListener
 
     /**
      * GSpace - Interactive Wall 页面关闭
-     * @param s
+     * @param s placement id
      */
     @Override
     public void onOfferWallClose(String s) {
@@ -125,7 +117,7 @@ public abstract class OkSpinListener implements OkSpin.SpinListener
 
     /**
      * GSpace 页面打开
-     * @param s
+     * @param s placement id
      */
     @Override
     public void onGSpaceOpen(String s) {
@@ -134,8 +126,7 @@ public abstract class OkSpinListener implements OkSpin.SpinListener
 
     /**
      * GSpace 页面打开失败
-     * @param s
-     * @param error
+     * @param s placement id
      */
     @Override
     public void onGSpaceOpenFailed(String s, Error error) {
@@ -144,7 +135,7 @@ public abstract class OkSpinListener implements OkSpin.SpinListener
 
     /**
      * GSpace 页面关闭
-     * @param s
+     * @param s placement id
      */
     @Override
     public void onGSpaceClose(String s) {

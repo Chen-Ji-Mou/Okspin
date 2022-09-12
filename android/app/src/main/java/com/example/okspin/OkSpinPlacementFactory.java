@@ -1,11 +1,8 @@
 package com.example.okspin;
 
 import android.content.Context;
-import android.util.Log;
 import android.view.View;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 
 import androidx.annotation.NonNull;
