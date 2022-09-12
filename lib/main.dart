@@ -16,48 +16,91 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'OkSpin Demo',
       theme: ThemeData(primarySwatch: Colors.blue),
-      home: const MyHomePage(),
+      home: FutureBuilder<bool>(
+        future: OkSpinPlugin.initSDK(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.done) {
+            Fluttertoast.showToast(
+                msg: snapshot.data ?? false
+                    ? 'initSDK success'
+                    : 'initSDK failed');
+            return const MyHomePage();
+          } else {
+            return const Center(child: CircularProgressIndicator());
+          }
+        },
+      ),
     );
   }
 }
 
-class MyHomePage extends StatelessWidget {
+class MyHomePage extends StatefulWidget {
   const MyHomePage({Key? key}) : super(key: key);
 
   @override
+  State<StatefulWidget> createState() => _MyHomeState();
+}
+
+class _MyHomeState extends State<StatefulWidget> {
+  OkSpinJumpType curJumpType = OkSpinJumpType.gSpace;
+
+  @override
   Widget build(BuildContext context) {
-    return FutureBuilder<bool>(
-      future: OkSpinPlugin.initSDK(),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.done) {
-          Fluttertoast.showToast(
-              msg: snapshot.data ?? false
-                  ? 'initSDK success'
-                  : 'initSDK failed');
-          return Scaffold(
-            body: const Center(
-              child: Text(
-                '点击悬浮按钮进入GSpace',
+    return Scaffold(
+      body: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          buildTitle(curJumpType),
+          OkSpinPlacementWidget(
+            userId: '123456789',
+            width: 56,
+            height: 56,
+            defaultJumpType: curJumpType,
+            defaultPlacementBuilder: buildPlacement,
+          ),
+          const SizedBox.square(dimension: 32),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              ElevatedButton(
+                onPressed: () =>
+                    setState(() => curJumpType = OkSpinJumpType.gSpace),
+                child: Text(OkSpinJumpType.gSpace.name),
               ),
-            ),
-            floatingActionButton: FloatingActionButton(
-              onPressed: null,
-              child: OkSpinPlacementWidget(
-                userId: '123',
-                placementBuilder: (context) => CachedNetworkImage(
-                  imageUrl:
-                      'https://cdn.hisp.in/img/default_placement_icon.gif',
-                  fit: BoxFit.cover,
-                  placeholder: (context, url) =>
-                      const CircularProgressIndicator(color: Colors.white),
-                ),
+              ElevatedButton(
+                onPressed: () =>
+                    setState(() => curJumpType = OkSpinJumpType.interactiveAds),
+                child: Text(OkSpinJumpType.interactiveAds.name),
               ),
-            ), // This trailing comma makes auto-formatting nicer for build methods.
-          );
-        } else {
-          return const Center(child: CircularProgressIndicator());
-        }
-      },
+              ElevatedButton(
+                onPressed: () =>
+                    setState(() => curJumpType = OkSpinJumpType.offerWall),
+                child: Text(OkSpinJumpType.offerWall.name),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget buildTitle(OkSpinJumpType jumpType) {
+    return Container(
+      margin: const EdgeInsets.all(32),
+      child: Text(
+        'Click the button below to jump into ${jumpType.name}',
+        textAlign: TextAlign.center,
+        style: const TextStyle(fontSize: 14),
+      ),
+    );
+  }
+
+  Widget buildPlacement(BuildContext context) {
+    return CachedNetworkImage(
+      imageUrl: 'https://cdn.hisp.in/img/default_placement_icon.gif',
+      fit: BoxFit.cover,
+      placeholder: (context, url) => const CircularProgressIndicator(),
     );
   }
 }

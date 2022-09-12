@@ -25,15 +25,24 @@ class OkSpinPlugin {
 
   static Future<bool> notifyGSPubTaskPayout(List<dynamic> records) async {
     return await _retry(
-        () => _channel.invokeMethod('notifyGSPubTaskPayout', records));
+        () => _channel.invokeMethod<bool>('notifyGSPubTaskPayout', records));
   }
 
   static Future<String> getUserId() async {
-    return await _channel.invokeMethod('getUserId') ?? '';
+    return await _channel.invokeMethod<String>('getUserId') ?? '';
   }
 
   static Future<bool> setUserId(String userId) async {
-    return await _retry(() => _channel.invokeMethod('setUserId', userId));
+    return await _retry(() => _channel.invokeMethod<bool>('setUserId', userId));
+  }
+
+  static Future<bool> openOfferWall() async {
+    return await _retry(() => _channel.invokeMethod<bool>('openOfferWall'));
+  }
+
+  static Future<bool> notifyOfferWallPayout() async {
+    return await _retry(
+        () => _channel.invokeMethod<bool>('notifyOfferWallPayout'));
   }
 
   static Future<bool> _retry(Future<bool?> Function() doThings) async {

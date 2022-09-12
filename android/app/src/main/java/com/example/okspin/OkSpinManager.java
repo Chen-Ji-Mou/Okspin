@@ -5,6 +5,7 @@ import android.util.Log;
 
 import com.spin.ok.gp.OkSpin;
 import com.spin.ok.gp.model.GSpaceReward;
+import com.spin.ok.gp.model.SpinReward;
 import com.spin.ok.gp.utils.Error;
 
 import java.util.List;
@@ -108,7 +109,7 @@ public class OkSpinManager {
                     {
                         // 返回记录到flutter端
                         List<GSpaceReward.GSpaceOrder> records = rewardRecord.getOrders();
-                        channel.invokeMethod("returnRewardRecords", records);
+                        channel.invokeMethod("returnGSpaceRewardRecords", records);
                     }
 
                     @Override
@@ -196,6 +197,75 @@ public class OkSpinManager {
 
     public static void getUserId(MethodChannel.Result result) {
         result.success(OkSpin.getUserId());
+    }
+
+    public static void openOfferWall(Context context, MethodChannel channel, MethodChannel.Result result) {
+        String placementId = context.getString(R.string.okspin_placement_id);
+        // 注册监听
+        OkSpin.setListener(new OkSpinListener()
+        {
+            @Override
+            public void onOfferWallOpen(String s)
+            {
+                super.onOfferWallOpen(s);
+                _return(result, true, null, null, false);
+            }
+
+            @Override
+            public void onOfferWallOpenFailed(String s, Error error)
+            {
+                super.onOfferWallOpenFailed(s, error);
+                _return(result, false, error,
+                        "openOfferWall => onOfferWallOpenFailed", false);
+            }
+
+            @Override
+            public void onOfferWallClose(String s)
+            {
+                super.onOfferWallClose(s);
+                channel.invokeMethod("onOfferWallClose", null);
+                _return(null, true, null, null, true);
+                // 查询OfferWall中的奖励记录
+                OkSpin.queryRewards(new OkSpin.QueryRewardsCallback()
+                {
+                    @Override
+                    public void onGetRewards(SpinReward spinReward)
+                    {
+                        // 通知flutter端
+                        channel.invokeMethod("returnOfferWallRewardRecords", null);
+                    }
+
+                    @Override
+                    public void onGetRewardsError(Error error) { /*do nothing*/ }
+                });
+            }
+        });
+        // OfferWall是否可用
+        if (OkSpin.isOfferWallReady(placementId)) {
+            // 打开OfferWall页面
+            OkSpin.openOfferWall(placementId);
+        } else {
+            _return(result, false, null, null, true);
+        }
+    }
+
+    public static void notifyOfferWallPayout(MethodChannel.Result result) {
+        // 发放OfferWall奖励完成后通知OKSpin
+        OkSpin.payout(new OkSpin.PayoutCallback()
+        {
+            @Override
+            public void onPayout(int i)
+            {
+                _return(result, true, null, null, false);
+            }
+
+            @Override
+            public void onPayoutError(Error error)
+            {
+                _return(result, false, error,
+                        "notifyOfferWallPayout => onPayoutError", false);
+            }
+        });
     }
 
     private static void _return(MethodChannel.Result result, boolean success, @Nullable Error error,

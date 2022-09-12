@@ -58,6 +58,12 @@ public class OkSpinPlugin implements FlutterPlugin, MethodChannel.MethodCallHand
             case "getUserId":
                 OkSpinManager.getUserId(result);
                 break;
+            case "openOfferWall":
+                OkSpinManager.openOfferWall(applicationContext, channel, result);
+                break;
+            case "notifyOfferWallPayout":
+                OkSpinManager.notifyOfferWallPayout(result);
+                break;
             default:
                 result.notImplemented();
                 break;

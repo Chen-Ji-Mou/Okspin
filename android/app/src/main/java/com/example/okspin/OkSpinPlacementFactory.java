@@ -1,8 +1,11 @@
 package com.example.okspin;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.View;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import androidx.annotation.NonNull;
@@ -12,7 +15,7 @@ import io.flutter.plugin.platform.PlatformView;
 import io.flutter.plugin.platform.PlatformViewFactory;
 
 public class OkSpinPlacementFactory extends PlatformViewFactory {
-    private OkSpinPlacement view;
+    private OkSpinPlacement placement;
 
     public OkSpinPlacementFactory() {
         super(StandardMessageCodec.INSTANCE);
@@ -22,11 +25,11 @@ public class OkSpinPlacementFactory extends PlatformViewFactory {
     @Override
     public PlatformView create(@Nullable Context context, int viewId, @Nullable Object args) {
         Map<String, Integer> params = (Map<String, Integer>) args;
-        view = new OkSpinPlacement(context, params);
-        return view;
+        placement = new OkSpinPlacement(context, params);
+        return placement;
     }
 
-    public void setPlacement(View placement) throws NullPointerException {
-        view.setPlacement(placement);
+    public void setPlacement(View icon) throws NullPointerException {
+        placement.setPlacement(icon);
     }
 }
