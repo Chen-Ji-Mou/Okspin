@@ -11,12 +11,4 @@ public class MainActivity extends FlutterActivity {
         // 在Flutter引擎中注册FlutterPlugin
         flutterEngine.getPlugins().add(new OkSpinPlugin());
     }
-
-    @Override
-    public void cleanUpFlutterEngine(
-            @NonNull
-                    FlutterEngine flutterEngine)
-    {
-        super.cleanUpFlutterEngine(flutterEngine);
-    }
 }

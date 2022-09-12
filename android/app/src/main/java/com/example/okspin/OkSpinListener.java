@@ -160,6 +160,6 @@ public abstract class OkSpinListener implements OkSpin.SpinListener
      */
     @Override
     public void onUserInteraction(String s, String s1) {
-        Log.d(TAG, "=> onInitSuccess "+s+" "+s1);
+        Log.d(TAG, "=> onUserInteraction "+s+" "+s1);
     }
 }

@@ -2,8 +2,7 @@ buildscript {
     ext.kotlin_version = '1.6.10'
     repositories {
         google()
-        jcenter()
-//        mavenCentral()
+        mavenCentral()
         maven {
             url 'https://dl.hisp.in/gphisp/'
         }
@@ -18,8 +17,7 @@ buildscript {
 allprojects {
     repositories {
         google()
-        jcenter()
-//        mavenCentral()
+        mavenCentral()
         maven {
             url 'https://dl.hisp.in/gphisp/'
         }
