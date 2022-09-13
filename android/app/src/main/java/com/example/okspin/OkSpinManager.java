@@ -1,16 +1,11 @@
 package com.example.okspin;
 
 import android.content.Context;
-import android.util.Log;
-
 import com.spin.ok.gp.OkSpin;
 import com.spin.ok.gp.model.GSpaceReward;
-import com.spin.ok.gp.model.SpinReward;
 import com.spin.ok.gp.utils.Error;
-
 import java.util.ArrayList;
 import java.util.List;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import io.flutter.BuildConfig;
@@ -58,7 +53,6 @@ public class OkSpinManager {
                     _return(result, true, null, null, true);
                 } catch (NullPointerException exception) {
                     String errorMsg = "OkSpin.showIcon(placementId) return null";
-                    Log.e(TAG, errorMsg, exception);
                     _return(result, false, new Error(-1, errorMsg),
                             null, true);
                 }
@@ -229,7 +223,6 @@ public class OkSpinManager {
             _return(result, true, null, null, false);
         } catch (Exception exception) {
             String errorMsg = "setUserId failed";
-            Log.e("OkSpinManager", errorMsg, exception);
             _return(result, false, new Error(-1, errorMsg), null, true);
         }
     }

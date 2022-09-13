@@ -80,6 +80,13 @@ class _MyHomeState extends State<StatefulWidget> {
               ),
             ],
           ),
+          OkSpinPlacementWidget(
+            userId: '123456789',
+            width: 56,
+            height: 56,
+            defaultJumpType: curJumpType,
+            defaultPlacementBuilder: buildPlacement,
+          ),
         ],
       ),
     );
