@@ -8,8 +8,10 @@ import com.spin.ok.gp.model.GSpaceReward;
 import com.spin.ok.gp.model.SpinReward;
 import com.spin.ok.gp.utils.Error;
 
+import java.util.ArrayList;
 import java.util.List;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import io.flutter.BuildConfig;
 import io.flutter.plugin.common.MethodChannel;
@@ -30,7 +32,8 @@ public class OkSpinManager {
             public void onInitFailed(Error error)
             {
                 super.onInitFailed(error);
-                _return(result, false, error, "initSDK => onInitFailed", true);
+                _return(result, false, error,
+                        "initSDK => onInitFailed", true);
             }
         });
         // 初始化SDK
@@ -39,7 +42,9 @@ public class OkSpinManager {
         OkSpin.debug(BuildConfig.DEBUG);
     }
 
-    public static void getPlacement(Context context, MethodChannel.Result result, OkSpinPlacementFactory factory) {
+    public static void getPlacement(Context context, MethodChannel.Result result,
+                                    OkSpinPlacementFactory factory)
+    {
         String placementId = context.getString(R.string.okspin_placement_id);
         // 注册监听
         OkSpin.setListener(new OkSpinListener()
@@ -54,7 +59,8 @@ public class OkSpinManager {
                 } catch (NullPointerException exception) {
                     String errorMsg = "OkSpin.showIcon(placementId) return null";
                     Log.e(TAG, errorMsg, exception);
-                    _return(result, false, new Error(-1, errorMsg), null, true);
+                    _return(result, false, new Error(-1, errorMsg),
+                            null, true);
                 }
             }
 
@@ -62,21 +68,25 @@ public class OkSpinManager {
             public void onIconLoadFailed(String s, Error error)
             {
                 super.onIconLoadFailed(s, error);
-                _return(result, false, error, "getPlacement => onIconLoadFailed", true);
+                _return(result, false, error,
+                        "getPlacement => onIconLoadFailed", true);
             }
 
             @Override
             public void onIconShowFailed(String s, Error error)
             {
                 super.onIconShowFailed(s, error);
-                _return(result, false, error, "getPlacement => onIconShowFailed", true);
+                _return(result, false, error,
+                        "getPlacement => onIconShowFailed", true);
             }
         });
         // 加载placement
         OkSpin.loadIcon(placementId);
     }
 
-    public static void openGSpace(Context context, MethodChannel channel, MethodChannel.Result result) {
+    public static void openGSpace(Context context, MethodChannel channel,
+                                  MethodChannel.Result result, GSpaceRewardCallback callback)
+    {
         String placementId = context.getString(R.string.okspin_placement_id);
         // 注册监听
         OkSpin.setListener(new OkSpinListener()
@@ -92,7 +102,8 @@ public class OkSpinManager {
             public void onGSpaceOpenFailed(String s, Error error)
             {
                 super.onGSpaceOpenFailed(s, error);
-                _return(result, false, error, "openGSpace => onGSpaceOpenFailed", false);
+                _return(result, false, error,
+                        "openGSpace => onGSpaceOpenFailed", false);
             }
 
             @Override
@@ -101,15 +112,24 @@ public class OkSpinManager {
                 super.onGSpaceClose(s);
                 channel.invokeMethod("onGSpaceClose", null);
                 _return(null, true, null, null, true);
-                // 查询用户在GSpace中已兑换的奖品的记录
+                // 查询用户在GSpace中已兑换的实物奖品的记录
                 OkSpin.queryGSpaceRewards(new OkSpin.QueryGSpaceRewardsCallback()
                 {
                     @Override
                     public void onGetGSRewards(GSpaceReward rewardRecord)
                     {
-                        // 返回记录到flutter端
-                        List<GSpaceReward.GSpaceOrder> records = rewardRecord.getOrders();
-                        channel.invokeMethod("returnGSpaceRewardRecords", records);
+                        // 返回所兑换的实物奖品id到flutter端
+                        List<String> records = new ArrayList<>();
+                        if (rewardRecord != null) {
+                            for (Object record : rewardRecord.getOrders()) {
+                                if (record instanceof GSpaceReward.GSpaceOrder) {
+                                    GSpaceReward.GSpaceOrder order = (GSpaceReward.GSpaceOrder) record;
+                                    records.add(order.getRewardId());
+                                }
+                            }
+                            callback.onGSpaceReward(rewardRecord);
+                        }
+                        channel.invokeMethod("returnGSpaceRewardIds", records);
                     }
 
                     @Override
@@ -127,14 +147,16 @@ public class OkSpinManager {
     }
 
     public static void notifyGSPubTaskPayout(MethodChannel.Result result,
-            @Nullable List<GSpaceReward.GSpaceOrder> records
-    ){
-        // 发放奖励完成后通知OKSpin
-        OkSpin.notifyGSPubTaskPayout(records, new OkSpin.GSPubTaskPayoutCallback()
+                                             @NonNull GSpaceReward reward,
+                                             @NonNull NotifyPayoutCallback callback)
+    {
+        // 发放GSpace实物奖励完成后通知OKSpin
+        OkSpin.notifyGSPubTaskPayout(reward.getOrders(), new OkSpin.GSPubTaskPayoutCallback()
         {
             @Override
             public void onGSPubTaskPayoutSuccess()
             {
+                callback.onCall();
                 _return(result, true, null, null, false);
             }
 
@@ -147,7 +169,9 @@ public class OkSpinManager {
         });
     }
 
-    public static void openInteractiveAds(Context context, MethodChannel channel, MethodChannel.Result result) {
+    public static void openInteractiveAds(Context context, MethodChannel channel,
+                                          MethodChannel.Result result)
+    {
         String placementId = context.getString(R.string.okspin_placement_id);
         // 注册监听
         OkSpin.setListener(new OkSpinListener()
@@ -173,6 +197,21 @@ public class OkSpinManager {
                 super.onInteractiveClose(s);
                 channel.invokeMethod("onInteractiveAdsClose", null);
                 _return(null, true, null, null, true);
+                // 回传sdk获取用户兑换的总奖励值
+                OkSpin.payout(new OkSpin.PayoutCallback() {
+                    /**
+                     * 用户奖励兑换成功
+                     * @param totalReward 兑换的总奖励值
+                     */
+                    @Override
+                    public void onPayout(int totalReward) {
+                        // 返回用户兑换的总奖励值到flutter端
+                        channel.invokeMethod("returnInteractiveAdsTotalReward", totalReward);
+                    }
+
+                    @Override
+                    public void onPayoutError(Error error) { /*do nothing*/ }
+                });
             }
         });
         // Interactive Ads是否可用
@@ -199,7 +238,9 @@ public class OkSpinManager {
         result.success(OkSpin.getUserId());
     }
 
-    public static void openOfferWall(Context context, MethodChannel channel, MethodChannel.Result result) {
+    public static void openOfferWall(Context context, MethodChannel channel,
+                                     MethodChannel.Result result)
+    {
         String placementId = context.getString(R.string.okspin_placement_id);
         // 注册监听
         OkSpin.setListener(new OkSpinListener()
@@ -225,18 +266,20 @@ public class OkSpinManager {
                 super.onOfferWallClose(s);
                 channel.invokeMethod("onOfferWallClose", null);
                 _return(null, true, null, null, true);
-                // 查询OfferWall中的奖励记录
-                OkSpin.queryRewards(new OkSpin.QueryRewardsCallback()
-                {
+                // 回传sdk获取用户兑换的总奖励值
+                OkSpin.payout(new OkSpin.PayoutCallback() {
+                    /**
+                     * 用户奖励兑换成功
+                     * @param totalReward 兑换的总奖励值
+                     */
                     @Override
-                    public void onGetRewards(SpinReward spinReward)
-                    {
-                        // 通知flutter端
-                        channel.invokeMethod("returnOfferWallRewardRecords", null);
+                    public void onPayout(int totalReward) {
+                        // 返回用户兑换的总奖励值到flutter端
+                        channel.invokeMethod("returnOfferWallTotalReward", totalReward);
                     }
 
                     @Override
-                    public void onGetRewardsError(Error error) { /*do nothing*/ }
+                    public void onPayoutError(Error error) { /*do nothing*/ }
                 });
             }
         });
@@ -249,28 +292,10 @@ public class OkSpinManager {
         }
     }
 
-    public static void notifyOfferWallPayout(MethodChannel.Result result) {
-        // 发放OfferWall奖励完成后通知OKSpin
-        OkSpin.payout(new OkSpin.PayoutCallback()
-        {
-            @Override
-            public void onPayout(int i)
-            {
-                _return(result, true, null, null, false);
-            }
-
-            @Override
-            public void onPayoutError(Error error)
-            {
-                _return(result, false, error,
-                        "notifyOfferWallPayout => onPayoutError", false);
-            }
-        });
-    }
-
-    private static void _return(MethodChannel.Result result, boolean success, @Nullable Error error,
-            @Nullable String errorMsg, boolean cancelListener
-    ){
+    private static void _return(MethodChannel.Result result, boolean success,
+                                @Nullable Error error, @Nullable String errorMsg,
+                                boolean cancelListener)
+    {
         // 返回结果到flutter端
         if (result != null) {
             if (error != null) {

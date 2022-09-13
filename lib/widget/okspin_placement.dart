@@ -10,7 +10,8 @@ class OkSpinPlacementWidget extends StatefulWidget {
       this.defaultJumpType = OkSpinJumpType.gSpace,
       required this.defaultPlacementBuilder,
       this.handleGSpaceRewards,
-      this.handleOfferWallRewards,
+      this.handleInteractiveAdsTotalReward,
+      this.handleOfferWallTotalReward,
       required this.width,
       required this.height})
       : super(key: key);
@@ -20,8 +21,9 @@ class OkSpinPlacementWidget extends StatefulWidget {
   final double height;
   final OkSpinJumpType defaultJumpType;
   final WidgetBuilder defaultPlacementBuilder;
-  final Future<void> Function(List<dynamic> records)? handleGSpaceRewards;
-  final Future<void> Function()? handleOfferWallRewards;
+  final Future<void> Function(List<String> rewardIds)? handleGSpaceRewards;
+  final void Function(int totalReward)? handleInteractiveAdsTotalReward;
+  final void Function(int totalReward)? handleOfferWallTotalReward;
 
   @override
   State<StatefulWidget> createState() => _OkSpinPlacementState();
@@ -105,20 +107,19 @@ class _OkSpinPlacementState extends State<OkSpinPlacementWidget> {
   Future<dynamic> channelCallback(MethodCall call) async {
     Fluttertoast.showToast(msg: '${call.method} params: ${call.arguments}');
     switch (call.method) {
-      case 'onOfferWallClose':
-      case 'onInteractiveAdsClose':
       case 'onGSpaceClose':
         changeJumpStatus();
         break;
-      case 'returnGSpaceRewardRecords':
+      case 'returnGSpaceRewardIds':
         await widget.handleGSpaceRewards?.call(call.arguments);
-        // 发放GSpace奖励完成后通知OKSpin
-        OkSpinPlugin.notifyGSPubTaskPayout(call.arguments);
+        // 发放GSpace实物奖励完成后通知OKSpin
+        OkSpinPlugin.notifyGSPubTaskPayout();
         break;
-      case 'returnOfferWallRewardRecords':
-        await widget.handleOfferWallRewards?.call();
-        // 发放OfferWall奖励完成后通知OKSpin
-        OkSpinPlugin.notifyOfferWallPayout();
+      case 'returnInteractiveAdsTotalReward':
+        widget.handleInteractiveAdsTotalReward?.call(call.arguments);
+        break;
+      case 'returnOfferWallTotalReward':
+        widget.handleOfferWallTotalReward?.call(call.arguments);
         break;
     }
   }

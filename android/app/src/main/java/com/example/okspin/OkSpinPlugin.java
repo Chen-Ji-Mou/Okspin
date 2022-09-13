@@ -3,6 +3,9 @@ package com.example.okspin;
 import android.content.Context;
 
 import androidx.annotation.NonNull;
+
+import com.spin.ok.gp.model.GSpaceReward;
+
 import io.flutter.embedding.engine.plugins.FlutterPlugin;
 import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
@@ -11,6 +14,7 @@ public class OkSpinPlugin implements FlutterPlugin, MethodChannel.MethodCallHand
     private Context applicationContext;
     private MethodChannel channel;
     private OkSpinPlacementFactory factory;
+    private GSpaceReward reward;
 
     @Override
     public void onAttachedToEngine(@NonNull FlutterPluginBinding binding) {
@@ -32,6 +36,8 @@ public class OkSpinPlugin implements FlutterPlugin, MethodChannel.MethodCallHand
         applicationContext = null;
         channel.setMethodCallHandler(null);
         channel = null;
+        factory = null;
+        reward = null;
     }
 
     @Override
@@ -44,13 +50,14 @@ public class OkSpinPlugin implements FlutterPlugin, MethodChannel.MethodCallHand
                 OkSpinManager.getPlacement(applicationContext, result, factory);
                 break;
             case "openGSpace":
-                OkSpinManager.openGSpace(applicationContext, channel, result);
+                OkSpinManager.openGSpace(applicationContext, channel, result,
+                        reward -> this.reward = reward);
                 break;
             case "openInteractiveAds":
                 OkSpinManager.openInteractiveAds(applicationContext, channel, result);
                 break;
             case "notifyGSPubTaskPayout":
-                OkSpinManager.notifyGSPubTaskPayout(result, call.arguments());
+                OkSpinManager.notifyGSPubTaskPayout(result, reward, () -> this.reward = null);
                 break;
             case "setUserId":
                 OkSpinManager.setUserId(result, call.arguments());
@@ -60,9 +67,6 @@ public class OkSpinPlugin implements FlutterPlugin, MethodChannel.MethodCallHand
                 break;
             case "openOfferWall":
                 OkSpinManager.openOfferWall(applicationContext, channel, result);
-                break;
-            case "notifyOfferWallPayout":
-                OkSpinManager.notifyOfferWallPayout(result);
                 break;
             default:
                 result.notImplemented();

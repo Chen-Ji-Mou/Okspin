@@ -23,9 +23,9 @@ class OkSpinPlugin {
         () => _channel.invokeMethod<bool>('openInteractiveAds'));
   }
 
-  static Future<bool> notifyGSPubTaskPayout(List<dynamic> records) async {
+  static Future<bool> notifyGSPubTaskPayout() async {
     return await _retry(
-        () => _channel.invokeMethod<bool>('notifyGSPubTaskPayout', records));
+        () => _channel.invokeMethod<bool>('notifyGSPubTaskPayout'));
   }
 
   static Future<String> getUserId() async {
@@ -38,11 +38,6 @@ class OkSpinPlugin {
 
   static Future<bool> openOfferWall() async {
     return await _retry(() => _channel.invokeMethod<bool>('openOfferWall'));
-  }
-
-  static Future<bool> notifyOfferWallPayout() async {
-    return await _retry(
-        () => _channel.invokeMethod<bool>('notifyOfferWallPayout'));
   }
 
   static Future<bool> _retry(Future<bool?> Function() doThings) async {
